@@ -1,0 +1,5 @@
+To Run: python CSVReader.py POM3A.csv
+
+Make sure the file you are testing is in the same directory as CSVReader.py
+
+RunningTime.txt shows the running time for running the CSVReader on POM3A
