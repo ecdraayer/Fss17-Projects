@@ -29,7 +29,7 @@ def mysplit(s, delim=None):
 
 def checktype( value, i ):
   if is_number(value):
-    if(headers[i][0] == '$' or headers[i][0] == '>' or headers[i][0] == '<'):
+    if(('$' in headers[i][0]) or ('<' in headers[i][0]) or('>' in headers[i][0])):
       return True
     else:
       return False
@@ -38,6 +38,7 @@ def checktype( value, i ):
       return True
     else:
       return False
+
 
 start_time = time.time()
 row1 = True
@@ -71,12 +72,13 @@ with open(csvFileName) as f:
     else:
       if line[-2] == ',':
         line = incomplete(line, f)
+        Line_Num += 1
      
       line = removeJunk(line)
       values = mysplit(line, ',')
 
       if isBad( values ):
-         print "Bad Number of Values on Line " + str(Line_Num)
+         print "ERROR: Bad Number of Values on Line " + str(Line_Num)
          continue
 
       for x in range(0, len(values)):
@@ -85,7 +87,8 @@ with open(csvFileName) as f:
           continue
         
         if (checktype(values[x], x) == False):
-           print "Bad Data Type on line " + str(Line_Num) + ", col " + str(x)
+           print "ERROR: Bad Data Type on line " + str(Line_Num) + ", col " + str(x)
+           break
 
         if ( is_number(values[x]) ):
           row.append(float(values[x])) 
@@ -93,8 +96,9 @@ with open(csvFileName) as f:
           row.append(values[x])
       
       Line_Num += 1
-      Data.append(row)
-
+      if (len(row) == NumofAttributes-len(IgnoreList)):
+        Data.append(row)
+#print Data
 print("--- %s seconds ---" % (time.time() - start_time))
 
 
