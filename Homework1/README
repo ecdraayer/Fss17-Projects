@@ -1,5 +1,20 @@
-To Run: python CSVReader.py POM3A.csv
+HOW TO RUN: 
+python CSVReader.py POM3A.csv
 
 Make sure the file you are testing is in the same directory as CSVReader.py
 
-RunningTime.txt shows the running time for running the CSVReader on POM3A
+OUTPUT:
+CSVReader.py will mark all errors as either a missing value type or data mismatch type and 
+tell you which row and column it occured. All rows with errors are ignored. Lastly,
+CSVReader also reports the running time
+
+FILES:
+-CSVReader.py: python file to execute the work for this assignment
+-POM3A.csv: given original csv table file
+-testData: File I used for my own debugging purposes 
+-RunningTime.txt: shows the running time for running the CSVReader on POM3A
+-README: You're looking at it
+
+PS:
+I'm not sure what you mean by adding you and menzies to this github repo, I assumed it meant inviting you as a github collaborator.
+If this is wrong, please let me know asap and tell me what exactly I should do and I'll fix the problem as soon as I can.
