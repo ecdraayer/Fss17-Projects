@@ -1,5 +1,12 @@
-To Run: python CSVReader.py POM3A.csv
+HOW TO RUN: 
+python CSV.py auto.csv
 
-Make sure the file you are testing is in the same directory as CSVReader.py
+Make sure the file you are testing is in the same directory as CSV.py
 
-RunningTime.txt shows the running time for running the CSVReader on POM3A
+OUTPUT:
+CSV.py will print out the top 5 ranked rows and the bottom 6 bottom rows in the terminal
+
+FILES:
+-CSV.py: python file to execute the work for this assignment
+-auto.csv: given original csv table file
+-README: You're looking at it

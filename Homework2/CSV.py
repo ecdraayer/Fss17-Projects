@@ -4,21 +4,53 @@ import time
 
 class Table(object):
   def __init__(self):
-    self.data = []
-    self.goals = 0
+    self.headers = None
+    self.rows = []    
+    self.goals = 0     
   
-  def add(self, inp):
-    self.data.append(inp)
+  def addHeaders(self, inp):
+    self.headers = inp
+    #self.headers.append(inp)
+   
+  def addData(self, inp):
+    self.rows.append(inp)
 
   def __str__(self):
     result = ""
-    for x in self.data:
-      for y in x:
-        result += y.name + '\n'
+    for x in self.headers:
+      result += x.name + " "
+    
+    result += "\n"
+    for x in self.rows:
+      result += str(x) + '\n'
 
 
     return result
-    
+  
+  def updateHeaders(self, row):
+    i = 0
+    for x in self.headers:
+      if(x.max == -1 and x.min == -1):
+        x.max, x.min = row[i], row[i]
+      else:
+        if(x.max < row[i]):
+          x.max = row[i]
+
+        if(x.min > row[i]):
+          x.min = row[i]
+      i += 1
+
+
+class Row(object):
+  def __init__(self):
+    self.data = []
+    self.index = -1
+    self.rank = -1
+
+  def __str__(self):
+    return "cells=%s, id=%d" %(str(self.data), self.index)
+
+
 class Header(object):
   def __init__(self):
     self.name = ""
@@ -26,10 +58,15 @@ class Header(object):
     self.dataType = ""
     self.type = ""
     self.goal = False
+    self.goals = 0
     self.weight = 0
-    self.std = -1
-    self.mean = -1
+    self.max = -1
+    self.min = -1
+    self.std = 0
+    self.mean = 0
     self.count = 0
+
+
 
   def __str__(self):
     result = self.name + "\n"
@@ -44,9 +81,42 @@ class Header(object):
     result += str(self.count) + "\n"
     return result
 
+# Normalizes the current data value v
+def normalize(v, minv, maxv):
+  return (v - minv) / ((maxv-minv) + (10**-2))
+    
+def dominate1(r1, r2, hs):
+  e = 2.71828
+  sum1,sum2 = 0.0,0.0
+  n = 0
+  for h in hs:
+    if(h.goal == True):
+      n += 1
+
+  for h in hs:
+    if (h.goal == False):
+      continue
+    w = h.weight
+    x = normalize(r1[h.position], h.min, h.max)
+    y = normalize(r2[h.position], h.min, h.max)
+    sum1 = sum1 - e**(w * (x-y)/n)
+    sum2 = sum2 - e**(w * (y-x)/n)
+
+  return sum1/n < sum2/n
+
+def dominate(row, t, indx):
+  rank = 0
+  for i, value in enumerate(t.rows):
+    if i != indx:
+      if dominate1(row.data, value.data, t.headers):
+        rank += 1
+
+
+  return rank
+
 
 # Test if a row of data is less than or greater than the number of attributes recorded
-def isBad(n):
+def isBad(n, NumofAttributes):
   return (len(n) < NumofAttributes or len(n) > NumofAttributes)
 
 # This function removes whitespace and anything after comment
@@ -69,14 +139,14 @@ def mysplit(s, delim=None):
   return [x for x in s.split(delim) if x]
 
 # Checks what data type belongs in column i and records it
-def checktype( value, i, headers ):
+def checktype( value, i, T ):
   if is_number(value):
-    if(('$' in headers[i][0]) or ('<' in headers[i][0]) or('>' in headers[i][0])):
+    if((T.headers[i]).dataType == "num"):
       return True
     else:
       return False
   else:
-    if(headers[i][0].isalpha()):
+    if((T.headers[i]).dataType == "sym"):
       return True
     else:
       return False
@@ -120,10 +190,12 @@ def checkSymbols( h, t ):
       t.goals += 1
       h.type = "dependent"
       h.goal = True
+      h.dataType = "sym"
     else:
       h.type = "independent"
+      h.dataType = "num"
 
-    h.dataType = "sym"
+    
 
 
 def main():
@@ -133,8 +205,8 @@ def main():
   csvFileName = sys.argv[1]
   IgnoreList = []
   T = Table()
-  dominate_dict={}
-
+  ind = 0
+  num = 0
   with open(csvFileName) as f:
     Line_Num = 1
 
@@ -162,29 +234,31 @@ def main():
           else:
             row.append(h)
 
-        T.add(row)
-        print T
+        T.addHeaders(row)
+
         isHeader = False
         Line_Num += 1
+        num += 1
 
       else:
+        r = Row()
+        r.index = num-1 + 1795
+        num += 1
         if line[-2] == ',':
           line = incomplete(line, f)
-          Line_Num += 1
      
         line = removeJunk(line)
         values = mysplit(line, ',')
 
-        if isBad( values ):
+        if isBad( values, NumofAttributes ):
           print "ERROR: Bad Number of Values on Line " + str(Line_Num)
           continue
 
-        for x in len(values):
-
+        for x in range(len(values)):
           if ( x in IgnoreList ):
             continue
         
-          if (checktype(values[x], x) == False):
+          if (checktype(values[x], x, T) == False):
             print "ERROR: Bad Data Type on line " + str(Line_Num) + ", col " + str(x)
             break
 
@@ -193,10 +267,30 @@ def main():
           else:
             row.append(values[x])
       
-          Line_Num += 1
-
           if (len(row) == NumofAttributes-len(IgnoreList)):
-            T.add(row)
+            Line_Num += 1
+            r.data = row
+            T.addData(r)
+            T.updateHeaders(row)
+  
+
+  for i, row in enumerate(T.rows):
+    row.rank = dominate(row, T, i)
+  
+  sort = sorted(T.rows, key=lambda row: -row.rank)
+  for h in T.headers:
+    print h.name+",",
+
+  print
+  for i in range(5):
+    print (sort[i])
+
+  print
+
+  for i in range(-6, 0):
+    print (sort[i])
+ 
+
 
 
 
