@@ -1,0 +1,9 @@
+HOW TO RUN: 
+python hw3.py
+
+OUTPUT:
+Output will be printed to file “Output”
+
+FILES:
+-hw3.py: file to be executed
+-Ouput: File that contains output
