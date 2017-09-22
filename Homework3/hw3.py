@@ -38,8 +38,50 @@ def local_distance(template_frame, test_frame):
     D += abs(template_frame[i] - test_frame[i])
 
   return D
-  
+
 def main():
+  
+  for i in range(len(template)):
+    for j in range(len(test)):
+
+      # Edge Case
+      if (i==0) and (j==0):
+         global_distance[i][j] = local_distance(template[i], test[j])
+         backpointer[i][j] = (None,None)
+      
+      elif (i==0):
+        assert global_distance[i][j-1] >= 0
+        global_distance[i][j] = global_distance[i][j-1] + local_distance(template[i], test[j])
+        backpointer[i][j] = (i,j-1)
+ 
+      elif (j==0):
+         assert global_distance[i-1][j] >= 0 
+         global_distance[i][j] = global_distance[i-1][j] + local_distance(template[i], test[j])
+         backpointer[i][j] = (i-1,j)
+ 
+      else:
+         assert global_distance[i][j-1]   >= 0
+         assert global_distance[i-1][j]   >= 0
+         assert global_distance[i-1][j-1] >= 0
+ 
+         lowest_global_distance = w_h * global_distance[i-1][j]
+         backpointer[i][j] = (i-1,j)
+ 
+         if (w_v * global_distance[i][j-1]) < lowest_global_distance:
+           lowest_global_distance = w_v * global_distance[i][j-1]
+           backpointer[i][j] = (i,j-1)
+     
+         if (w_d * global_distance[i-1][j-1]) < lowest_global_distance:
+           lowest_global_distance = w_d * global_distance[i-1][j-1]
+           backpointer[i][j] = (i-1,j-1)
+
+         global_distance[i][j] = lowest_global_distance + local_distance(template[i], test[j])
+
+  D = global_distance[len(template)-1][len(test)-1]
+
+  alignment = []
+  i,j = len(template)-1, len(test)-1
+  alignment.append( (i,j) )
 
   # Generate Random Numbers
 
