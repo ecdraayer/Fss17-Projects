@@ -1,5 +1,5 @@
 HOW TO RUN: 
-python hw3.py
+python hw3.py > Output
 
 OUTPUT:
 Output will be printed to file “Output”
