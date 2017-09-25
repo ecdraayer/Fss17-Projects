@@ -1,2 +1,9 @@
-UnSupervised Ranges:
-Supervised Ranges:
+We have many unsupervised ranges.
+1:  {span = 0.204892, lo= 0.014646, n= 8, hi= 0.219538}
+2:  {span = 0.120988, lo= 0.219588, n= 8, hi= 0.340576}
+3:  {span = 0.052757, lo= 0.347194, n= 10, hi= 0.399951}
+4:  {span = 0.198303, lo= 0.411827, n= 8, hi= 0.610130}
+5:  {span = 0.130937, lo= 0.612718, n= 8, hi= 0.743655}
+6:  {span = 0.235488, lo= 0.764382, n= 8, hi= 0.999870}
+
+We have fewer supervised ranges.
